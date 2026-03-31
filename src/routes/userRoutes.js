@@ -1,0 +1,14 @@
+import express from "express";
+import { auth, allowRoles } from "../middleware/auth.js";
+import {
+  addAvailability,
+  getMyAvailability,
+} from "../controllers/availabilityController.js";
+
+const router = express.Router();
+
+router.post("/availability", auth, allowRoles("user"), addAvailability);
+
+router.get("/availability", auth, allowRoles("user"), getMyAvailability);
+
+export default router;
