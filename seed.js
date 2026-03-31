@@ -1,5 +1,8 @@
+import "dotenv/config";
 import { pool } from "./src/config/db.js";
 import bcrypt from "bcryptjs";
+
+console.log("DB URL:", process.env.DATABASE_URL);
 
 const seed = async () => {
   await pool.query(`DELETE FROM users`);
