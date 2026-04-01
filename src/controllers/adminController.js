@@ -102,3 +102,70 @@ export const getRecommendations = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const bookCall = async (req, res) => {
+  const { userId, mentorId, call_type } = req.body;
+
+  try {
+    // Get user availability
+    const userAvail = await pool.query(
+      `SELECT * FROM availability WHERE user_id = $1`,
+      [userId]
+    );
+
+    // Get mentor availability
+    const mentorAvail = await pool.query(
+      `SELECT * FROM availability WHERE user_id = $1`,
+      [mentorId]
+    );
+
+    let matchedSlot = null;
+
+    // Find overlap
+    for (let u of userAvail.rows) {
+      for (let m of mentorAvail.rows) {
+        if (u.date.toISOString() === m.date.toISOString()) {
+          if (
+            u.start_time < m.end_time &&
+            m.start_time < u.end_time
+          ) {
+            matchedSlot = {
+              date: u.date,
+              start: u.start_time > m.start_time ? u.start_time : m.start_time,
+              end: u.end_time < m.end_time ? u.end_time : m.end_time,
+            };
+            break;
+          }
+        }
+      }
+      if (matchedSlot) break;
+    }
+
+    if (!matchedSlot) {
+      return res.status(400).json({
+        message: "No overlapping availability found",
+      });
+    }
+
+    // Create call
+    const result = await pool.query(
+      `INSERT INTO calls (user_id, mentor_id, call_type, start_time, end_time)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        userId,
+        mentorId,
+        call_type,
+        `${matchedSlot.date.toISOString().split("T")[0]} ${matchedSlot.start}`,
+        `${matchedSlot.date.toISOString().split("T")[0]} ${matchedSlot.end}`,
+      ]
+    );
+
+    res.json({
+      message: "Call booked successfully",
+      call: result.rows[0],
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

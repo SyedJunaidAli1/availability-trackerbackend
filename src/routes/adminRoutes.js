@@ -4,6 +4,7 @@ import {
   getUsers,
   getMentors,
   getRecommendations,
+  bookCall,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get(
   allowRoles("admin"),
   getRecommendations,
 );
+router.post("/book-call", auth, allowRoles("admin"), bookCall);
 
 export default router;
