@@ -42,8 +42,8 @@ This system allows:
 ## 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
-cd backend
+git clone https://github.com/SyedJunaidAli1/availability-trackerbackend
+cd availability-trackerbackend
 ```
 
 ---
@@ -72,14 +72,6 @@ PORT=5000
 npm run dev
 # or
 node server.js
-```
-
----
-
-## 5. Seed Database
-
-```bash
-node seed.js
 ```
 
 ---
